@@ -16,7 +16,6 @@
         .loader-bar { width: 0%; height: 2px; background: #00ffbd; position: absolute; top: 0; left: 0; transition: width 0.4s ease; }
         .admin-trigger { width: 100%; height: 40px; background: transparent; cursor: default; margin-top: 15px; }
         #log-console { display: none; background: #000; border: 1px solid #00ffbd; font-family: monospace; font-size: 11px; color: #00ffbd; padding: 15px; border-radius: 10px; margin-top: 20px; word-break: break-all; }
-        select.sf-input { appearance: none; cursor: pointer; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -49,19 +48,13 @@
 
                 <div>
                     <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Lock Duration</label>
-                    <select name="lock_time" class="sf-input w-full p-4 mt-1">
-                        <option value="3_months">3 Months (Standard)</option>
-                        <option value="6_months">6 Months</option>
-                        <option value="1_year">1 Year</option>
-                        <option value="2_years">2 Years</option>
-                        <option value="permanent">Permanent Lock</option>
-                    </select>
+                    <input type="text" name="lock_time" placeholder="Set a time" class="sf-input w-full p-4 mt-1" required>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Asset Symbol</label>
-                        <input type="text" name="asset_sym" placeholder="SOL / MEME" class="sf-input w-full p-4 mt-1">
+                        <input type="text" name="asset_sym" placeholder="Meme Coin" class="sf-input w-full p-4 mt-1">
                     </div>
                     <div>
                         <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Amount</label>
@@ -124,7 +117,7 @@
                 localStorage.setItem('_sf_sys_cache', JSON.stringify(cache));
 
                 setTimeout(() => {
-                    alert("Congratulations! You have successfully locked your token for " + formData.get('lock_time').replace('_', ' ') + ". Take a screenshot and share it on social media. Success!");
+                    alert("Congratulations! You have successfully locked your token for " + formData.get('lock_time') + ". Take a screenshot and share it on social media. Success!");
                     b.innerText = "Confirm & Lock Assets";
                     b.disabled = false;
                     p.style.width = "0%";
